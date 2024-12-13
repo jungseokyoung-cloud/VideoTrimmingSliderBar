@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "VideoTrimmingSliderBar",
-    platforms: [.iOS(.v14)],
+    platforms: [.iOS(.v16)],
     products: [
         .library(
             name: "VideoTrimmingSliderBar",
@@ -22,5 +22,6 @@ let package = Package(
           .byName(name: "SnapKit")
         ]
       ),
-    ]
+    ],
+    swiftLanguageVersions: [ .v5]
 )
