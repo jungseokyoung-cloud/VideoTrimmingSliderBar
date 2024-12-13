@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import AVFoundation
 
-@available(iOS 13.0.0, *)
+@available(iOS 16.0.0, *)
 @MainActor
 public protocol VideoTrimmingSliderBarDelegate: AnyObject {
   func lowerValueDidChanged(_ sliderBar: VideoTrimmingSliderBar, value: Double)
@@ -17,7 +17,7 @@ public protocol VideoTrimmingSliderBarDelegate: AnyObject {
   func seekValueDidChanged(_ sliderBar: VideoTrimmingSliderBar, value: Double)
 }
 
-@available(iOS 13.0.0, *)
+@available(iOS 16.0.0, *)
 public final class VideoTrimmingSliderBar: UIControl {
   enum Constants {
     static let thumbWidth: CGFloat = 16
@@ -47,7 +47,7 @@ public final class VideoTrimmingSliderBar: UIControl {
     return total < 0 ? 0 : total
   }
   
-  /// 현재 slider의 최솟값
+  /// 현재 lowerThumb의 값(초 단위)
   public private(set) var lowerValue: Double = 0.0 {
     didSet {
       updateThumbFrame(lowerThumb)
@@ -57,7 +57,7 @@ public final class VideoTrimmingSliderBar: UIControl {
     }
   }
   
-  /// 현재 slider의 최댓값
+  /// 현재 upperThumb의 값(초 단위)
   public private(set) var upperValue: Double = 100 {
     didSet {
       updateThumbFrame(upperThumb)
@@ -148,13 +148,13 @@ public final class VideoTrimmingSliderBar: UIControl {
 }
 
 // MARK: - UI Methods
-@available(iOS 13.0.0, *)
+@available(iOS 16.0.0, *)
 private extension VideoTrimmingSliderBar {
   func setupUI() {
     self.backgroundColor = .clear
     topLayer.backgroundColor = UIColor.systemYellow.cgColor
     bottomLayer.backgroundColor = UIColor.systemYellow.cgColor
-
+    
     setViewHierarchy()
     setConstraints()
     setLowerThumbAttributes()
@@ -187,7 +187,7 @@ private extension VideoTrimmingSliderBar {
   
   func setLowerThumbAttributes() {
     let boldConfig = UIImage.SymbolConfiguration(weight: .heavy)
-
+    
     let image = UIImage(systemName: "chevron.left")?
       .color(.systemGray)
       .withConfiguration(boldConfig)
@@ -323,5 +323,50 @@ private extension VideoTrimmingSliderBar {
     guard range > 0 else { return 0 }
     let proportion = (value - lowerValue) / range
     return Double(upperThumb.frame.minX - lowerThumb.frame.maxX) * proportion
+  }
+}
+
+// MARK: - ImageFrames
+@available(iOS 16.0.0, *)
+private extension VideoTrimmingSliderBar {
+  /// `frameCount` 만큼의  frame Image들을 단일 frameImage로 리턴해줍니다.
+  func frameImage(from video: AVAsset, frameCount: Int) async -> UIImage? {
+    guard let cmTimeDuration = try? await video.load(.duration) else { return nil }
+    let secondsDuration = Int(CMTimeGetSeconds(cmTimeDuration))
+    let singleFrameDuration = Double(secondsDuration) / Double(frameCount)
+    
+    let frameCMTimes = (0..<frameCount).map { index -> CMTime in
+      let startTime = singleFrameDuration * Double(index)
+      
+      return CMTimeMakeWithSeconds(startTime, preferredTimescale: Int32(secondsDuration))
+    }
+    
+    let generator = avAssetImageGenerator(from: video)
+    
+    return await frameImage(from: generator, times: frameCMTimes)
+  }
+  
+  func avAssetImageGenerator(from video: AVAsset) -> AVAssetImageGenerator {
+    let generator = AVAssetImageGenerator(asset: video)
+    generator.appliesPreferredTrackTransform = true
+    generator.requestedTimeToleranceAfter = CMTime.zero
+    generator.requestedTimeToleranceBefore = CMTime.zero
+    
+    return generator
+  }
+  
+  func frameImage(from generator: AVAssetImageGenerator, times: [CMTime]) async -> UIImage? {
+    var resultImages = Array(repeating: UIImage(), count: times.count)
+    
+    await withTaskGroup(of: Void.self) { group in
+      for (index, time) in times.enumerated() {
+        group.addTask {
+          guard let image = try? await generator.generateUIImage(at: time) else { return }
+          resultImages[index] = image
+        }
+      }
+    }
+    
+    return resultImages.concatImagesHorizontallyGPU()
   }
 }
