@@ -212,8 +212,44 @@ private extension VideoTrimmingSliderBar {
   }
 }
 
+// MARK: - Public Methods
+@available(iOS 16.0.0, *)
+public extension VideoTrimmingSliderBar {
+  func configure(
+    with asset: AVAsset,
+    lowerValue: Double,
+    upperValue: Double,
+    seekValue: Double,
+    frameCount: Int
+  ) {
+    self.maximumValue = asset.duration.seconds
+    self.lowerValue = lowerValue.bound(lower: 0, upper: upperValue)
+    self.upperValue = upperValue.bound(lower: lowerValue, upper: maximumValue)
+    self.seekValue = seekValue.bound(lower: lowerValue, upper: upperValue)
+    
+    Task {
+      imageFrameView.image = await frameImage(from: asset, frameCount: frameCount)
+    }
+  }
+  
+  func configure(with asset: AVAsset, frameCount: Int = 20) {
+    self.maximumValue = asset.duration.seconds
+    self.lowerValue = 0
+    self.upperValue = maximumValue
+    self.seekValue = lowerValue
+    
+    Task {
+      imageFrameView.image = await frameImage(from: asset, frameCount: frameCount)
+    }
+  }
+  
+  func update(seekValue: Double) {
+    self.seekValue = seekValue.bound(lower: lowerValue, upper: upperValue)
+  }
+}
+
 // MARK: - Private Methotds
-@available(iOS 13.0.0, *)
+@available(iOS 16.0.0, *)
 private extension VideoTrimmingSliderBar {
   func updateThumbsFrame() {
     updateThumbFrame(lowerThumb)
