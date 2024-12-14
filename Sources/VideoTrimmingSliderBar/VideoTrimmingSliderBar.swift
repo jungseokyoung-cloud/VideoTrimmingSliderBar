@@ -222,23 +222,23 @@ public extension VideoTrimmingSliderBar {
     seekValue: Double,
     frameCount: Int
   ) {
-    self.maximumValue = asset.duration.seconds
-    self.lowerValue = lowerValue.bound(lower: 0, upper: upperValue)
-    self.upperValue = upperValue.bound(lower: lowerValue, upper: maximumValue)
-    self.seekValue = seekValue.bound(lower: lowerValue, upper: upperValue)
-    
     Task {
+      guard let duration = try? await asset.load(.duration) else { return }
+      self.maximumValue = duration.seconds
+      self.lowerValue = lowerValue.bound(lower: 0, upper: upperValue)
+      self.upperValue = upperValue.bound(lower: lowerValue, upper: maximumValue)
+      self.seekValue = seekValue.bound(lower: lowerValue, upper: upperValue)
       imageFrameView.image = await frameImage(from: asset, frameCount: frameCount)
     }
   }
   
   func configure(with asset: AVAsset, frameCount: Int = 20) {
-    self.maximumValue = asset.duration.seconds
-    self.lowerValue = 0
-    self.upperValue = maximumValue
-    self.seekValue = lowerValue
-    
     Task {
+      guard let duration = try? await asset.load(.duration) else { return }
+      self.maximumValue = duration.seconds
+      self.lowerValue = 0
+      self.upperValue = maximumValue
+      self.seekValue = lowerValue
       imageFrameView.image = await frameImage(from: asset, frameCount: frameCount)
     }
   }
