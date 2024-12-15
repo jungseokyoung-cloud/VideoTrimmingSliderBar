@@ -174,6 +174,8 @@ private extension VideoTrimmingSliderBar {
   }
   
   func setConstraints() {
+    [imageFrameView, imageFrameBlurView].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+    
     NSLayoutConstraint.activate([
       imageFrameView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Constants.thumbWidth),
       imageFrameView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.thumbWidth),
