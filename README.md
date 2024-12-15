@@ -8,7 +8,7 @@
 - [Description](#description)
 
 ## Requirements 
-- iOS 16.0+
+- iOS 7.0+
 
 ## Installation 
 - Swift Package Manager
