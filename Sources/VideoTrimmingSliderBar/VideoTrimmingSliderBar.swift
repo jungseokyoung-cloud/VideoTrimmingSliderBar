@@ -16,7 +16,7 @@ public protocol VideoTrimmingSliderBarDelegate: AnyObject {
   func seekValueDidChanged(_ sliderBar: VideoTrimmingSliderBar, value: Double)
 }
 
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 public final class VideoTrimmingSliderBar: UIControl {
   enum Constants {
     static let thumbWidth: CGFloat = 16
@@ -147,13 +147,15 @@ public final class VideoTrimmingSliderBar: UIControl {
 }
 
 // MARK: - UI Methods
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 private extension VideoTrimmingSliderBar {
   func setupUI() {
     self.backgroundColor = .clear
     
     setViewHierarchy()
     setConstraints()
+    setTopLayerAttributes()
+    setBottomLayerAttributes()
     setLowerThumbAttributes()
     setUpperThumbAttributes()
     setSeekThumbAttributes()
@@ -221,7 +223,7 @@ private extension VideoTrimmingSliderBar {
 }
 
 // MARK: - Public Methods
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 public extension VideoTrimmingSliderBar {
   func configure(
     with asset: AVAsset,
@@ -257,7 +259,7 @@ public extension VideoTrimmingSliderBar {
 }
 
 // MARK: - Private Methotds
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 private extension VideoTrimmingSliderBar {
   func updateThumbsFrame() {
     updateThumbFrame(lowerThumb)
@@ -371,7 +373,7 @@ private extension VideoTrimmingSliderBar {
 }
 
 // MARK: - ImageFrames
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 private extension VideoTrimmingSliderBar {
   /// `frameCount` 만큼의  frame Image들을 단일 frameImage로 리턴해줍니다.
   func frameImage(from video: AVAsset, frameCount: Int) async -> UIImage? {

@@ -8,19 +8,18 @@
 import AVFoundation
 import UIKit
 
-@available(iOS 16.0, *)
+@available(iOS 4.0, *)
 extension AVAssetImageGenerator {
   func generateUIImage(at time: CMTime) async throws -> UIImage {
-    return try await withCheckedThrowingContinuation { continutation in
-      generateCGImageAsynchronously(for: time) { cgImage, _, error in
-        if let error {
-          continutation.resume(throwing: error)
-        }
-        
-        guard let cgImage else { return }
-        
-        continutation.resume(returning: UIImage(cgImage: cgImage))
-      }
+    if #available(iOS 16.0, *) {
+      guard let cgImage = try? await image(at: time).image else { return UIImage() }
+      
+      
+      return UIImage(cgImage: cgImage)
+    } else {
+      guard let cgImage = try? copyCGImage(at: time, actualTime: nil) else { return UIImage() }
+      
+      return UIImage(cgImage: cgImage)
     }
   }
 }
