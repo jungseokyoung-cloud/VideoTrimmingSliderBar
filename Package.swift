@@ -12,16 +12,8 @@ let package = Package(
             targets: ["VideoTrimmingSliderBar"]
         )
     ],
-    dependencies: [
-      .package(name: "SnapKit", url: "https://github.com/SnapKit/SnapKit.git", .exactItem("5.0.1"))
-    ],
     targets: [
-      .target(
-        name: "VideoTrimmingSliderBar",
-        dependencies: [
-          .byName(name: "SnapKit")
-        ]
-      ),
+      .target(name: "VideoTrimmingSliderBar"),
     ],
-    swiftLanguageVersions: [ .v5]
+    swiftLanguageVersions: [.v5]
 )

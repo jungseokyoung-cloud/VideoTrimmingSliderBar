@@ -6,10 +6,9 @@
 //
 
 import UIKit
-import SnapKit
 import AVFoundation
 
-@available(iOS 16.0.0, *)
+@available(iOS 7.0.0, *)
 @MainActor
 public protocol VideoTrimmingSliderBarDelegate: AnyObject {
   func lowerValueDidChanged(_ sliderBar: VideoTrimmingSliderBar, value: Double)
@@ -152,8 +151,6 @@ public final class VideoTrimmingSliderBar: UIControl {
 private extension VideoTrimmingSliderBar {
   func setupUI() {
     self.backgroundColor = .clear
-    topLayer.backgroundColor = UIColor.systemYellow.cgColor
-    bottomLayer.backgroundColor = UIColor.systemYellow.cgColor
     
     setViewHierarchy()
     setConstraints()
@@ -175,14 +172,25 @@ private extension VideoTrimmingSliderBar {
   }
   
   func setConstraints() {
-    imageFrameView.snp.makeConstraints {
-      $0.leading.trailing.equalToSuperview().inset(Constants.thumbWidth)
-      $0.top.bottom.equalToSuperview().inset(Constants.imageFramsPadding)
-    }
-    
-    imageFrameBlurView.snp.makeConstraints {
-      $0.edges.equalToSuperview()
-    }
+    NSLayoutConstraint.activate([
+      imageFrameView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Constants.thumbWidth),
+      imageFrameView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Constants.thumbWidth),
+      imageFrameView.topAnchor.constraint(equalTo: topAnchor, constant: Constants.imageFramsPadding),
+      imageFrameView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Constants.imageFramsPadding),
+      
+      imageFrameBlurView.topAnchor.constraint(equalTo: imageFrameView.topAnchor),
+      imageFrameBlurView.bottomAnchor.constraint(equalTo: imageFrameView.bottomAnchor),
+      imageFrameBlurView.leadingAnchor.constraint(equalTo: imageFrameView.leadingAnchor),
+      imageFrameBlurView.trailingAnchor.constraint(equalTo: imageFrameView.trailingAnchor)
+    ])
+  }
+  
+  func setTopLayerAttributes() {
+    topLayer.backgroundColor = UIColor.systemYellow.cgColor
+  }
+  
+  func setBottomLayerAttributes() {
+    bottomLayer.backgroundColor = UIColor.systemYellow.cgColor
   }
   
   func setLowerThumbAttributes() {
